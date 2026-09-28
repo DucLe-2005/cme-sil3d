@@ -1,4 +1,5 @@
 import os
+import json
 import numpy as np
 import pandas as pd
 import torch
@@ -9,22 +10,41 @@ from sklearn.model_selection import train_test_split
 import segmentation_models_pytorch as smp
 import matplotlib.pyplot as plt
 import logging
+import wandb
 
 ###########################################
 # Configuration and Logger Setup
 ###########################################
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "train_config.json")
 config = {
-    "csv_file": "/data/CME_Silhouettes/processed_dataset_new/file_list.csv",
-    "root_dir": "/data/CME_Silhouettes/processed_dataset_new",
+    "csv_file": "/data/CME_reconstruction/cme_silhouette/processed_dataset_new/file_list.csv",
+    "root_dir": "/data/CME_reconstruction/cme_silhouette/processed_dataset_new",
     "target_size": (832, 832),
     "batch_size": 12,
     "num_workers": 8,
     "num_epochs": 50,
     "learning_rate": 1e-4,
     "checkpoint_path": "best_model.pth",
-    "alpha_loss": 0.5,  # weight for combined loss
+    "model_name": "upernet",
+    "alpha_loss": 0.5,
     "seed": 42,
+    "visualization_samples": 30,
+    "threshold": 0.5,
+    "wandb": {
+        "project": "cme-reconstruction",
+        "entity": None,
+        "run_name": None,
+        "tags": ["segmentation"],
+        "mode": "online",
+    },
 }
+
+with open(CONFIG_PATH, "r", encoding="utf-8") as config_file:
+    config.update(json.load(config_file))
+
+# JSON can override target_size with a list; the dataset expects a tuple.
+if isinstance(config["target_size"], list):
+    config["target_size"] = tuple(config["target_size"])
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 torch.manual_seed(config["seed"])
@@ -114,13 +134,27 @@ class ProcessedSegmentationDataset(Dataset):
 ###########################################
 # Model, Loss Functions, and Metrics
 ###########################################
-model = smp.Unet(
-    encoder_name="resnet18",
-    encoder_weights="imagenet",
-    in_channels=1,
-    classes=1,
-    activation=None
-)
+# Add/remove models here. Each model uses the same encoder and training code.
+model_classes = {
+    "unet": smp.Unet,
+    "unetplusplus": smp.UnetPlusPlus,
+    "deeplabv3": smp.DeepLabV3,
+    "deeplabv3plus": smp.DeepLabV3Plus,
+    "manet": smp.MAnet,
+    "linknet": smp.Linknet,
+    "fpn": smp.FPN,
+    "upernet": smp.UPerNet,
+    "segformer": smp.Segformer,
+}
+
+def build_model(model_class):
+    return model_class(
+        encoder_name="resnet18",
+        encoder_weights="imagenet",
+        in_channels=1,
+        classes=1,
+        activation=None,
+    )
 
 def dice_loss(outputs, targets, smooth=1e-6):
     outputs = torch.sigmoid(outputs)
@@ -209,63 +243,7 @@ def validate(model, dataloader, device):
 ###########################################
 # Main Training Loop
 ###########################################
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-logging.info(f"Training on device: {device}")
-model = model.to(device)
-optimizer = optim.Adam(model.parameters(), lr=config["learning_rate"])
-train_losses, train_ious = [], []
-val_losses, val_ious = [], []
-best_loss = float('inf')
-
-for epoch in range(config["num_epochs"]):
-    train_loss, train_iou = train_one_epoch(model, train_loader, optimizer, device)
-    val_loss, val_iou = validate(model, val_loader, device)
-    
-    train_losses.append(train_loss)
-    train_ious.append(train_iou)
-    val_losses.append(val_loss)
-    val_ious.append(val_iou)
-    
-    logging.info(f"Epoch {epoch+1}/{config['num_epochs']}: Train Loss = {train_loss:.4f}, Train IoU = {train_iou:.4f}, Val Loss = {val_loss:.4f}, Val IoU = {val_iou:.4f}")
-    
-    # Save checkpoint if improved on training loss
-    if train_loss < best_loss:
-        best_loss = train_loss
-        save_checkpoint(model, optimizer, epoch, train_loss, config["checkpoint_path"])
-
-
-
-
-###########################################
-# Plotting Training Metrics
-###########################################
-import matplotlib.pyplot as plt
-
-epochs = range(1, config["num_epochs"] + 1)
-
-plt.figure(figsize=(12, 5))
-plt.subplot(1, 2, 1)
-plt.plot(epochs, train_losses, 'b-', label='Training Loss')
-plt.plot(epochs, val_losses, 'r-', label='Validation Loss')
-plt.xlabel('Epoch')
-plt.ylabel('Loss')
-plt.title('Loss over Epochs')
-plt.legend()
-
-plt.subplot(1, 2, 2)
-plt.plot(epochs, train_ious, 'b-', label='Training IoU')
-plt.plot(epochs, val_ious, 'r-', label='Validation IoU')
-plt.xlabel('Epoch')
-plt.ylabel('IoU')
-plt.title('IoU over Epochs')
-plt.legend()
-
-plt.tight_layout()
-plt.show()
-
-
-
-def visualize_predictions(model, dataloader, device, num_samples=30, threshold=0.5):
+def visualize_predictions(model, dataloader, device, model_name, num_samples=30, threshold=0.5):
     model.eval()
     all_inputs, all_masks, all_outputs = [], [], []
     total_collected = 0
@@ -295,7 +273,7 @@ def visualize_predictions(model, dataloader, device, num_samples=30, threshold=0
 
     # Use the minimum of num_samples and collected samples.
     num_samples = min(num_samples, all_inputs.shape[0])
-    
+
     # Create subplots: 4 columns per sample (original, ground truth, predicted, overlay)
     fig, axs = plt.subplots(num_samples, 4, figsize=(25, 5*num_samples))
     for i in range(num_samples):
@@ -320,16 +298,78 @@ def visualize_predictions(model, dataloader, device, num_samples=30, threshold=0
         axs[i, 3].imshow(pred_mask, cmap='Reds', alpha=0.3)
         axs[i, 3].set_title("Overlay: Input + Prediction")
         axs[i, 3].axis("off")
-    
+
     plt.tight_layout()
+    prediction_path = f"predicted_samples_{model_name}.png"
+    plt.savefig(prediction_path, dpi=150, bbox_inches="tight")
     plt.show()
+    return prediction_path
+
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+logging.info(f"Training on device: {device}")
+model_name = config["model_name"]
+if model_name not in model_classes:
+    raise ValueError(f"Unknown model_name '{model_name}'. Available: {', '.join(model_classes)}")
+
+wandb_settings = config["wandb"]
+run = wandb.init(
+    project=wandb_settings["project"],
+    entity=wandb_settings.get("entity"),
+    name=wandb_settings.get("run_name") or model_name,
+    tags=wandb_settings.get("tags"),
+    mode=wandb_settings.get("mode", "online"),
+    config={key: value for key, value in config.items() if key != "wandb"},
+)
+model = build_model(model_classes[model_name]).to(device)
+optimizer = optim.Adam(model.parameters(), lr=config["learning_rate"])
+train_losses, train_ious = [], []
+val_losses, val_ious = [], []
+best_loss = float('inf')
+checkpoint_path = f"{model_name}_{config['checkpoint_path']}"
+
+for epoch in range(config["num_epochs"]):
+    train_loss, train_iou = train_one_epoch(model, train_loader, optimizer, device)
+    val_loss, val_iou = validate(model, val_loader, device)
+
+    train_losses.append(train_loss)
+    train_ious.append(train_iou)
+    val_losses.append(val_loss)
+    val_ious.append(val_iou)
+
+    logging.info(f"Epoch {epoch+1}/{config['num_epochs']}: Train Loss = {train_loss:.4f}, Train IoU = {train_iou:.4f}, Val Loss = {val_loss:.4f}, Val IoU = {val_iou:.4f}")
+    run.log({
+        "epoch": epoch + 1,
+        "train/loss": train_loss,
+        "train/iou": train_iou,
+        "validation/loss": val_loss,
+        "validation/iou": val_iou,
+    })
+
+    if train_loss < best_loss:
+        best_loss = train_loss
+        save_checkpoint(model, optimizer, epoch, train_loss, checkpoint_path)
 
 
 
-# Visualize predictions on the validation set
-visualize_predictions(model, val_loader, device)
+prediction_path = visualize_predictions(
+    model,
+    val_loader,
+    device,
+    model_name,
+    num_samples=config["visualization_samples"],
+    threshold=config["threshold"],
+)
+run.log({
+    "plots/validation_predictions": wandb.Image(prediction_path),
+    "best_train_loss": best_loss,
+})
 
-
-
-
-
+model_artifact = wandb.Artifact(
+    name=f"{model_name}-model",
+    type="model",
+    metadata={"model_name": model_name, "best_train_loss": best_loss},
+)
+model_artifact.add_file(checkpoint_path)
+run.log_artifact(model_artifact)
+run.finish()
