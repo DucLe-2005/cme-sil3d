@@ -1,0 +1,97 @@
+_wandb:
+    value:
+        cli_version: 0.30.0
+        e:
+            1n6kg1233j19qucyooyqxafnf2an54ov:
+                codePath: Train2d-backbone.py
+                codePathLocal: Train2d-backbone.py
+                cpu_count: 96
+                cpu_count_logical: 192
+                cudaVersion: "13.0"
+                disk:
+                    /:
+                        total: "30237158154240"
+                        used: "1339496038400"
+                email: duc.anh.le@tcu.edu
+                executable: /home/ducanhle/.conda/envs/cme/bin/python
+                git:
+                    commit: 70a36c96dca63b0d09cb6f4ef12e9b922678ca2d
+                    remote: https://github.com/DucLe-2005/cme-sil3d.git
+                gpu: NVIDIA A100-SXM4-80GB
+                gpu_count: 2
+                gpu_nvidia:
+                    - architecture: Ampere
+                      cudaCores: 6912
+                      memoryTotal: "85899345920"
+                      name: NVIDIA A100-SXM4-80GB
+                      uuid: GPU-7f3541aa-25c3-b819-7598-d9fc96759313
+                    - architecture: Ampere
+                      cudaCores: 6912
+                      memoryTotal: "85899345920"
+                      name: NVIDIA A100-SXM4-80GB
+                      uuid: GPU-70f725f4-a43a-c884-15a8-8256dee631af
+                host: nova
+                memory:
+                    total: "270093746176"
+                os: Linux-6.8.0-55-generic-x86_64-with-glibc2.39
+                program: /home/ducanhle/cme-sil3d/Train2d-backbone.py
+                python: CPython 3.11.16
+                root: /home/ducanhle/cme-sil3d
+                startedAt: "2026-09-28T19:10:22.272514Z"
+                writerId: 1n6kg1233j19qucyooyqxafnf2an54ov
+        m: []
+        python_version: 3.11.16
+        t:
+            "1":
+                - 1
+                - 5
+                - 41
+                - 49
+                - 53
+                - 63
+                - 74
+            "2":
+                - 1
+                - 5
+                - 41
+                - 49
+                - 53
+                - 63
+                - 74
+            "3":
+                - 2
+                - 13
+                - 15
+                - 16
+            "4": 3.11.16
+            "5": 0.30.0
+            "12": 0.30.0
+            "13": linux-x86_64
+alpha_loss:
+    value: 0.5
+batch_size:
+    value: 12
+checkpoint_path:
+    value: best_model.pth
+csv_file:
+    value: /data/CME_reconstruction/cme_silhouette/processed_dataset_new/file_list.csv
+learning_rate:
+    value: 0.0001
+model_name:
+    value: unet
+num_epochs:
+    value: 20
+num_workers:
+    value: 8
+root_dir:
+    value: /data/CME_reconstruction/cme_silhouette/processed_dataset_new
+seed:
+    value: 42
+target_size:
+    value:
+        - 832
+        - 832
+threshold:
+    value: 0.5
+visualization_samples:
+    value: 30

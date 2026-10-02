@@ -1,0 +1,47 @@
+{
+  "os": "Linux-6.8.0-55-generic-x86_64-with-glibc2.39",
+  "python": "CPython 3.11.16",
+  "startedAt": "2026-09-28T21:30:34.312693Z",
+  "program": "/home/ducanhle/cme-sil3d/Train2d-backbone.py",
+  "codePath": "Train2d-backbone.py",
+  "codePathLocal": "Train2d-backbone.py",
+  "git": {
+    "remote": "https://github.com/DucLe-2005/cme-sil3d.git",
+    "commit": "2a09abb08540b44e361dcd71ad29011364f5cc82"
+  },
+  "email": "duc.anh.le@tcu.edu",
+  "root": "/home/ducanhle/cme-sil3d",
+  "host": "nova",
+  "executable": "/home/ducanhle/.conda/envs/cme/bin/python",
+  "cpu_count": 96,
+  "cpu_count_logical": 192,
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "gpu_count": 2,
+  "disk": {
+    "/": {
+      "total": "30237158154240",
+      "used": "1340818513920"
+    }
+  },
+  "memory": {
+    "total": "270093746176"
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA A100-SXM4-80GB",
+      "memoryTotal": "85899345920",
+      "cudaCores": 6912,
+      "architecture": "Ampere",
+      "uuid": "GPU-7f3541aa-25c3-b819-7598-d9fc96759313"
+    },
+    {
+      "name": "NVIDIA A100-SXM4-80GB",
+      "memoryTotal": "85899345920",
+      "cudaCores": 6912,
+      "architecture": "Ampere",
+      "uuid": "GPU-70f725f4-a43a-c884-15a8-8256dee631af"
+    }
+  ],
+  "cudaVersion": "13.0",
+  "writerId": "e8pu3fonec2375ngcs1lobdpz0sx4q8c"
+}
