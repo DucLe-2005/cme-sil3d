@@ -1,0 +1,106 @@
+_wandb:
+    value:
+        cli_version: 0.30.0
+        e:
+            xl62og45b24aa82rlaxlrjb95yriqlt9:
+                codePath: train_new_data_backbone.py
+                codePathLocal: train_new_data_backbone.py
+                cpu_count: 96
+                cpu_count_logical: 192
+                cudaVersion: "13.0"
+                disk:
+                    /:
+                        total: "30237158154240"
+                        used: "2335194275840"
+                email: duc.anh.le@tcu.edu
+                executable: /home/ducanhle/.conda/envs/cme/bin/python
+                git:
+                    commit: db675a14c5894efdd4010969dcd37edf2e082354
+                    remote: https://github.com/DucLe-2005/cme-sil3d.git
+                gpu: NVIDIA A100-SXM4-80GB
+                gpu_count: 2
+                gpu_nvidia:
+                    - architecture: Ampere
+                      cudaCores: 6912
+                      memoryTotal: "85899345920"
+                      name: NVIDIA A100-SXM4-80GB
+                      uuid: GPU-7f3541aa-25c3-b819-7598-d9fc96759313
+                    - architecture: Ampere
+                      cudaCores: 6912
+                      memoryTotal: "85899345920"
+                      name: NVIDIA A100-SXM4-80GB
+                      uuid: GPU-70f725f4-a43a-c884-15a8-8256dee631af
+                host: nova
+                memory:
+                    total: "270093746176"
+                os: Linux-6.8.0-55-generic-x86_64-with-glibc2.39
+                program: /home/ducanhle/cme-sil3d/train_new_data_backbone.py
+                python: CPython 3.11.16
+                root: /home/ducanhle/cme-sil3d
+                startedAt: "2026-10-26T19:49:29.906055Z"
+                writerId: xl62og45b24aa82rlaxlrjb95yriqlt9
+        m: []
+        mask/class_labels:
+            predictions_wandb_delimeter_ground_truth:
+                key: predictions_wandb_delimeter_ground_truth
+                type: mask/class_labels
+                value:
+                    "0": Background
+                    "1": CME
+            predictions_wandb_delimeter_prediction:
+                key: predictions_wandb_delimeter_prediction
+                type: mask/class_labels
+                value:
+                    "0": Background
+                    "1": CME
+        python_version: 3.11.16
+        t:
+            "1":
+                - 1
+                - 5
+                - 41
+                - 49
+                - 53
+                - 63
+                - 74
+            "2":
+                - 1
+                - 5
+                - 41
+                - 49
+                - 53
+                - 63
+                - 74
+            "3":
+                - 2
+                - 14
+                - 16
+                - 62
+            "4": 3.11.16
+            "5": 0.30.0
+            "12": 0.30.0
+            "13": linux-x86_64
+alpha_loss:
+    value: 0.3739444535267594
+batch_size:
+    value: 32
+checkpoint_path:
+    value: best_unet_baseline.pth
+instrument:
+    value: c2
+learning_rate:
+    value: 1.6702857912977896e-05
+max_cases:
+    value: 10
+num_epochs:
+    value: 30
+num_workers:
+    value: 8
+root_dir:
+    value: /home/ducanhle/synthetic_cme_dataset/synthetic_coronagraphs/all_finished_cmes_lon10
+seed:
+    value: 42
+target_size:
+    value:
+        - 192
+        - 192

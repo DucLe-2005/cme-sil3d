@@ -1,0 +1,14 @@
+wandb_version: 1
+
+alpha_loss:
+  value: 0.8800461764249395
+batch_size:
+  value: 16
+learning_rate:
+  value: 1.5099329853097822e-05
+num_epochs:
+  value: 30
+seed:
+  value: 42
+weight_decay:
+  value: 3.752382318013606e-05

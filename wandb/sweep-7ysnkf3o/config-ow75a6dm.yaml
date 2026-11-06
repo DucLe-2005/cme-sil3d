@@ -1,0 +1,16 @@
+wandb_version: 1
+
+alpha_loss:
+  value: 0.8643184921847589
+batch_size:
+  value: 16
+instrument:
+  value: c2
+learning_rate:
+  value: 0.0002496736751773272
+max_cases:
+  value: 10
+num_epochs:
+  value: 30
+seed:
+  value: 42

@@ -1,0 +1,34 @@
+# Run from this directory: wandb sweep sweep.yaml
+program: train_new_data_backbone.py
+project: cme-segmentation
+name: unet-c2-bayesian-v1
+method: bayes
+metric:
+  name: best_val_iou
+  goal: maximize
+# Global budget shared by all agents attached to this sweep.
+run_cap: 30
+# Values are read through wandb.init / run.config, not CLI arguments.
+command:
+  - ${env}
+  - ${interpreter}
+  - ${program}
+parameters:
+  instrument:
+    value: c2  # Set to c3 and create a separate sweep to optimize C3.
+  learning_rate:
+    distribution: log_uniform_values
+    min: 0.00001
+    max: 0.001
+  batch_size:
+    values: [8, 16, 32, 40]
+  alpha_loss:
+    distribution: uniform
+    min: 0.1
+    max: 0.9
+  num_epochs:
+    values: [30, 50, 70]
+# Other settings use config in train_new_data_backbone.py.
+# To override the dataset location, uncomment and edit:
+#  root_dir:
+#    value: /absolute/path/to/case_folders
